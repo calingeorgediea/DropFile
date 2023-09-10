@@ -5,8 +5,7 @@ const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
 const path = require('path');
 const fs = require('fs');
-
-
+const sanitizeFilename = require('sanitize-filename');
 const upload = async (req, res) => {
     try {
         // Assuming that the user ID is stored in req.user.id
@@ -31,16 +30,25 @@ const list = async (req, res) => {
       // Assuming user ID is available in req.user.id
       const userID = req.user.id;
   
-      // Construct the user's storage path
-      const userStoragePath = `./DropFile/users/${userID}`;
+      // Get the folder path from the request body
+      const { folderPath } = req.body;
   
-      // Check if the user's storage directory exists
-      if (!fs.existsSync(userStoragePath)) {
-        return res.status(httpStatus.NOT_FOUND).json({ message: 'User storage not found' });
+      // Construct the full path to the requested folder
+      const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
+      const requestedFolderPath = path.resolve(userStoragePath, folderPath || '');
+  
+      // Check if the requested folder path is outside the user's storage directory
+      if (!requestedFolderPath.startsWith(userStoragePath)) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid folderPath' });
       }
   
-      // List files in the user's storage directory
-      const files = fs.readdirSync(userStoragePath);
+      // Check if the requested folder exists
+      if (!fs.existsSync(requestedFolderPath)) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'Folder not found' });
+      }
+  
+      // List files in the requested folder
+      const files = fs.readdirSync(requestedFolderPath);
   
       res.status(httpStatus.OK).json({ files });
     } catch (error) {
@@ -48,6 +56,8 @@ const list = async (req, res) => {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to list files' });
     }
   };
+  
+  
 
 module.exports = {
     upload,
