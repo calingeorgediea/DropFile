@@ -20,6 +20,215 @@ module.exports = router;
 /**
  * @swagger
  * tags:
+ *   name: File Upload
+ *   description: File Upload
+ */
+
+/**
+ * @swagger
+ * /dropfile/upload:
+ *   post:
+ *     summary: Upload a file
+ *     tags: [File Upload]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       "200":
+ *         description: File uploaded successfully
+ *       "400":
+ *         description: Bad request
+ *       "500":
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /dropfile/delete:
+ *   delete:
+ *     summary: Delete a file or directory
+ *     tags: [File Upload]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               folderPath:
+ *                 type: string
+ *                 description: The path to the folder containing the item to be deleted. Leave empty for the root directory.
+ *               itemName:
+ *                 type: string
+ *                 description: The name of the file or directory to be deleted.
+ *             example:
+ *               folderPath: "my-folder"
+ *               itemName: "folder"
+ *     responses:
+ *       "200":
+ *         description: Item deleted successfully
+ *       "400":
+ *         description: Bad request
+ *       "404":
+ *         description: Item not found
+ *       "500":
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /dropfile/rename:
+ *   put:
+ *     summary: Rename a file or directory
+ *     tags: [File Upload]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               folderPath:
+ *                 type: string
+ *                 description: The path to the folder containing the item to be renamed. Leave empty for the root directory.
+ *               oldName:
+ *                 type: string
+ *                 description: The current name of the file or directory.
+ *               newName:
+ *                 type: string
+ *                 description: The new name for the file or directory.
+ *               itemType:
+ *                 type: string
+ *                 enum: [directory, file]
+ *                 description: The type of the item to be renamed (directory or file).
+ *             example:
+ *               folderPath: "my-folder"
+ *               oldName: "old-name.txt"
+ *               newName: "new-name.txt"
+ *               itemType: "file"
+ *     responses:
+ *       "200":
+ *         description: Item renamed successfully
+ *       "400":
+ *         description: Bad request
+ *       "404":
+ *         description: Item not found
+ *       "500":
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /dropfile/move:
+ *   put:
+ *     summary: Move a file to a new location
+ *     tags: [File Upload]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPath:
+ *                 type: string
+ *                 description: The current path of the file to be moved.
+ *               destinationPath:
+ *                 type: string
+ *                 description: The destination path where the file will be moved.
+ *             example:
+ *               currentPath: "folder/file.txt"
+ *               destinationPath: "new-folder/file.txt"
+ *     responses:
+ *       "200":
+ *         description: File moved successfully
+ *       "400":
+ *         description: Bad request
+ *       "404":
+ *         description: File or destination directory not found
+ *       "500":
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /dropfile/list:
+ *   get:
+ *     summary: List files and directories
+ *     tags: [File Upload]
+ *     parameters:
+ *       - in: query
+ *         name: folderPath
+ *         schema:
+ *           type: string
+ *         description: The path to the folder whose content should be listed. Leave empty for the root directory.
+ *       - in: query
+ *         name: showStructure
+ *         schema:
+ *           type: boolean
+ *         description: Set to true to return the entire directory structure; false to return only the content of the specified path.
+ *     responses:
+ *       "200":
+ *         description: File and directory listing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 structure:
+ *                   type: array
+ *                   description: The directory structure (if showStructure is true) or the content of the specified path.
+ *       "400":
+ *         description: Bad request
+ *       "404":
+ *         description: Folder not found
+ *       "500":
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /dropfile/create-directory:
+ *   post:
+ *     summary: Create a new directory
+ *     tags: [File Upload]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               folderPath:
+ *                 type: string
+ *                 description: The path to the folder where the new directory should be created. Leave empty for the root directory.
+ *               directoryName:
+ *                 type: string
+ *                 description: The name of the new directory to be created.
+ *             example:
+ *               folderPath: "my-folder"
+ *               directoryName: "new-directory"
+ *     responses:
+ *       "201":
+ *         description: Directory created successfully
+ *       "400":
+ *         description: Bad request
+ *       "404":
+ *         description: Folder not found
+ *       "500":
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * tags:
  *   name: Auth
  *   description: Authentication
  */
