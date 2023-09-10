@@ -37,5 +37,7 @@ const upload = multer({ storage });
 router.post('/upload', auth(), upload.single('file'), fileController.upload);
 router.get('/list', auth(), fileController.list);
 router.post('/create-directory', auth(), fileController.createDirectory);
+router.delete('/delete', auth(), fileController.deleteItem);
+
 
 module.exports = router;
