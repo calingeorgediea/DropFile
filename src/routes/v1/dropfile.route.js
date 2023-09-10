@@ -35,6 +35,6 @@ const upload = multer({ storage });
 // Define a route for file uploads
 // Protect the route with authentication middleware
 router.post('/upload', auth(), upload.single('file'), fileController.upload);
-
+router.get('/list', auth(), fileController.list);
 
 module.exports = router;
