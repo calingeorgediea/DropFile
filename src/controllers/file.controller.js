@@ -25,6 +25,41 @@ const upload = async (req, res) => {
     }
 };
 
+const createDirectory = async (req, res) => {
+    try {
+      // Assuming user ID is available in req.user.id
+      const userID = req.user.id;
+  
+      // Get the folder path and directory name from the request body
+      const { folderPath, directoryName } = req.body;
+  
+      // Construct the full path to the user's storage directory
+      const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
+  
+      // Construct the full path to the requested folder
+      const requestedFolderPath = path.resolve(userStoragePath, folderPath || '');
+  
+      // Check if the requested folder path is outside the user's storage directory
+      if (!requestedFolderPath.startsWith(userStoragePath)) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid folderPath' });
+      }
+  
+      // Check if the requested folder exists
+      if (!fs.existsSync(requestedFolderPath)) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'Folder not found' });
+      }
+  
+      // Create the new directory inside the requested folder
+      const newDirectoryPath = path.resolve(requestedFolderPath, directoryName);
+      fs.mkdirSync(newDirectoryPath);
+  
+      res.status(httpStatus.CREATED).json({ message: 'Directory created successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to create directory' });
+    }
+  };
+
 const list = async (req, res) => {
   try {
     // Assuming user ID is available in req.user.id
@@ -112,5 +147,6 @@ function listFolderContent(directory) {
 
 module.exports = {
     upload,
-    list
+    list,
+    createDirectory
 };

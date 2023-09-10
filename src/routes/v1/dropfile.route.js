@@ -36,5 +36,6 @@ const upload = multer({ storage });
 // Protect the route with authentication middleware
 router.post('/upload', auth(), upload.single('file'), fileController.upload);
 router.get('/list', auth(), fileController.list);
+router.post('/create-directory', auth(), fileController.createDirectory);
 
 module.exports = router;
