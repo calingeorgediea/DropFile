@@ -25,6 +25,51 @@ const upload = async (req, res) => {
     }
 };
 
+const rename = async (req, res) => {
+    try {
+      // Assuming user ID is available in req.user.id
+      const userID = req.user.id;
+  
+      // Get the folder path, old item name, new item name, and item type from the request body
+      const { folderPath, oldName, newName, itemType } = req.body;
+  
+      // Construct the full path to the user's storage directory
+      const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
+  
+      // Determine the base path for renaming (root or folderPath)
+      const basePath = folderPath ? path.resolve(userStoragePath, folderPath) : userStoragePath;
+  
+      // Construct the full paths to the old and new items
+      const oldItemPath = path.resolve(basePath, oldName);
+      const newItemPath = path.resolve(basePath, newName);
+  
+      // Check if the old item exists
+      if (!fs.existsSync(oldItemPath)) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'Item not found' });
+      }
+  
+      // Check if the new item name is valid and does not already exist
+      if (fs.existsSync(newItemPath) || !newName) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid or duplicate item name' });
+      }
+  
+      // Rename the item based on its type (directory or file)
+      if (itemType === 'directory') {
+        fs.renameSync(oldItemPath, newItemPath);
+        res.status(httpStatus.OK).json({ message: 'Directory renamed successfully' });
+      } else if (itemType === 'file') {
+        fs.renameSync(oldItemPath, newItemPath);
+        res.status(httpStatus.OK).json({ message: 'File renamed successfully' });
+      } else {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid item type' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to rename item' });
+    }
+  };
+  
+
 const deleteItem = async (req, res) => {
     try {
       // Assuming user ID is available in req.user.id
@@ -195,5 +240,5 @@ module.exports = {
     upload,
     list,
     createDirectory,
-    deleteItem
+    deleteItem,rename
 };

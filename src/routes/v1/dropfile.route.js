@@ -38,6 +38,6 @@ router.post('/upload', auth(), upload.single('file'), fileController.upload);
 router.get('/list', auth(), fileController.list);
 router.post('/create-directory', auth(), fileController.createDirectory);
 router.delete('/delete', auth(), fileController.deleteItem);
-
+router.put('/rename', auth(), fileController.rename);
 
 module.exports = router;
