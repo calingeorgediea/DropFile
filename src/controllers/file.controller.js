@@ -30,8 +30,8 @@ const deleteItem = async (req, res) => {
       // Assuming user ID is available in req.user.id
       const userID = req.user.id;
   
-      // Get the folder path and directory name from the request body
-      const { folderPath, directoryName } = req.body;
+      // Get the folder path and item name from the request body
+      const { folderPath, itemName } = req.body;
   
       // Construct the full path to the user's storage directory
       const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
@@ -39,25 +39,35 @@ const deleteItem = async (req, res) => {
       // Determine the base path for deletion (root or folderPath)
       const basePath = folderPath ? path.resolve(userStoragePath, folderPath) : userStoragePath;
   
-      // Determine whether to delete a directory based on the provided parameters
-      if (directoryName) {
-        // Delete a directory
-        const itemPath = path.resolve(basePath, directoryName);
+      // Determine whether to delete a file or a directory based on the provided parameters
+      if (itemName) {
+        // Delete an item at the specified path
+        const itemPath = path.resolve(basePath, itemName);
+  
         if (!itemPath.startsWith(userStoragePath)) {
-          return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid directoryName' });
+          return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid itemName' });
         }
+  
         if (!fs.existsSync(itemPath)) {
-          return res.status(httpStatus.NOT_FOUND).json({ message: 'Directory not found' });
+          return res.status(httpStatus.NOT_FOUND).json({ message: 'Item not found' });
         }
-        fs.rmdirSync(itemPath, { recursive: true });
+  
+        // Determine whether to delete a file or a directory based on the item type
+        const itemStats = fs.statSync(itemPath);
+  
+        if (itemStats.isDirectory()) {
+          fs.rmdirSync(itemPath, { recursive: true });
+        } else {
+          fs.unlinkSync(itemPath);
+        }
       } else {
-        return res.status(httpStatus.BAD_REQUEST).json({ message: 'Missing directoryName' });
+        return res.status(httpStatus.BAD_REQUEST).json({ message: 'Missing itemName' });
       }
   
-      res.status(httpStatus.OK).json({ message: 'Directory deleted successfully' });
+      res.status(httpStatus.OK).json({ message: 'Item deleted successfully' });
     } catch (error) {
       console.error(error);
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to delete directory' });
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to delete item' });
     }
   };
 
