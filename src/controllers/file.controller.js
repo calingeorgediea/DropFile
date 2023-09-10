@@ -116,6 +116,41 @@ const deleteItem = async (req, res) => {
     }
   };
 
+  const moveFile = async (req, res) => {
+    try {
+      // Assuming user ID is available in req.user.id
+      const userID = req.user.id;
+  
+      // Get the current file path and destination path from the request body
+      const { currentPath, destinationPath } = req.body;
+  
+      // Construct the full path to the user's storage directory
+      const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
+  
+      // Construct the full paths to the current file and destination
+      const currentFilePath = path.resolve(userStoragePath, currentPath);
+      const destinationFilePath = path.resolve(userStoragePath, destinationPath);
+  
+      // Check if the current file exists
+      if (!fs.existsSync(currentFilePath)) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'File not found' });
+      }
+  
+      // Check if the destination directory exists
+      if (!fs.existsSync(path.dirname(destinationFilePath))) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'Destination directory not found' });
+      }
+  
+      // Move the file to the destination
+      fs.renameSync(currentFilePath, destinationFilePath);
+  
+      res.status(httpStatus.OK).json({ message: 'File moved successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to move file' });
+    }
+  };
+
 const createDirectory = async (req, res) => {
     try {
       // Assuming user ID is available in req.user.id
@@ -240,5 +275,6 @@ module.exports = {
     upload,
     list,
     createDirectory,
-    deleteItem,rename
+    deleteItem,rename,
+    moveFile
 };
