@@ -121,19 +121,19 @@ const deleteItem = async (req, res) => {
       // Assuming user ID is available in req.user.id
       const userID = req.user.id;
   
-      // Get the current file path and destination path from the request body
+      // Get the current path and destination path from the request body
       const { currentPath, destinationPath } = req.body;
   
       // Construct the full path to the user's storage directory
       const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
   
-      // Construct the full paths to the current file and destination
+      // Construct the full paths to the current and destination
       const currentFilePath = path.resolve(userStoragePath, currentPath);
       const destinationFilePath = path.resolve(userStoragePath, destinationPath);
   
-      // Check if the current file exists
+      // Check if the current file or directory exists
       if (!fs.existsSync(currentFilePath)) {
-        return res.status(httpStatus.NOT_FOUND).json({ message: 'File not found' });
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'File or directory not found' });
       }
   
       // Check if the destination directory exists
@@ -141,13 +141,23 @@ const deleteItem = async (req, res) => {
         return res.status(httpStatus.NOT_FOUND).json({ message: 'Destination directory not found' });
       }
   
-      // Move the file to the destination
-      fs.renameSync(currentFilePath, destinationFilePath);
+      // Determine whether the item is a file or directory
+      const itemStats = fs.statSync(currentFilePath);
   
-      res.status(httpStatus.OK).json({ message: 'File moved successfully' });
+      if (itemStats.isDirectory()) {
+        // If it's a directory, recursively move all contents to the destination
+        fs.renameSync(currentFilePath, destinationFilePath);
+  
+        res.status(httpStatus.OK).json({ message: 'Directory and its contents moved successfully' });
+      } else {
+        // If it's a file, simply move the file to the destination
+        fs.renameSync(currentFilePath, destinationFilePath);
+  
+        res.status(httpStatus.OK).json({ message: 'File moved successfully' });
+      }
     } catch (error) {
       console.error(error);
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to move file' });
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to move item' });
     }
   };
 
