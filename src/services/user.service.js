@@ -1,6 +1,8 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
+const multer = require('multer');
+const fs = require('fs');
 
 /**
  * Create a user
@@ -79,6 +81,14 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+const createStorage = async (user) => {
+  const user_id = user.id;
+  const userStoragePath = './DropFile/users/' + user.id;
+  if(!fs.existsSync(userStoragePath)) {
+    fs.mkdirSync(userStoragePath);
+  }
+}
+
 module.exports = {
   createUser,
   queryUsers,
@@ -86,4 +96,5 @@ module.exports = {
   getUserByEmail,
   updateUserById,
   deleteUserById,
+  createStorage
 };
