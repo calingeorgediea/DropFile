@@ -162,29 +162,32 @@ module.exports = router;
  * /dropfile/list:
  *   get:
  *     summary: List files and directories
- *     tags: [File Upload]
+ *     tags: [File Operations]
  *     parameters:
  *       - in: query
  *         name: folderPath
  *         schema:
  *           type: string
- *         description: The path to the folder whose content should be listed. Leave empty for the root directory.
+ *         description: The path of the folder to list contents from.
  *       - in: query
  *         name: showStructure
  *         schema:
  *           type: boolean
- *         description: Set to true to return the entire directory structure; false to return only the content of the specified path.
+ *         description: Set to true to retrieve the entire directory structure.
  *     responses:
  *       "200":
- *         description: File and directory listing
+ *         description: List of files and directories
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
  *                 structure:
+ *                   type: object
+ *                   description: The directory structure (if showStructure is true).
+ *                 content:
  *                   type: array
- *                   description: The directory structure (if showStructure is true) or the content of the specified path.
+ *                   description: The list of files and directories (if showStructure is false).
  *       "400":
  *         description: Bad request
  *       "404":
@@ -192,6 +195,7 @@ module.exports = router;
  *       "500":
  *         description: Internal server error
  */
+
 
 /**
  * @swagger

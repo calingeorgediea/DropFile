@@ -196,51 +196,52 @@ const createDirectory = async (req, res) => {
     }
   };
 
-const list = async (req, res) => {
-  try {
-    // Assuming user ID is available in req.user.id
-    const userID = req.user.id;
-
-    // Get the folder path from the request body
-    const { folderPath, showStructure } = req.body;
-
-    // Construct the full path to the user's storage directory
-    const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
-
-    // If folderPath is empty, return the entire directory structure
-    if (!folderPath && showStructure === 'true') {
-      const directoryStructure = buildFileTree(userStoragePath, userStoragePath);
-      res.status(httpStatus.OK).json({ structure: directoryStructure });
-      return;
+  const list = async (req, res) => {
+    try {
+      // Assuming user ID is available in req.user.id
+      const userID = req.user.id;
+  
+      // Get the folder path from the query parameters
+      const { folderPath, showStructure } = req.query;
+  
+      // Construct the full path to the user's storage directory
+      const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
+  
+      // If folderPath is empty, return the entire directory structure
+      if (!folderPath && showStructure === 'true') {
+        const directoryStructure = buildFileTree(userStoragePath, userStoragePath);
+        res.status(httpStatus.OK).json({ structure: directoryStructure });
+        return;
+      }
+  
+      // Construct the full path to the requested folder
+      const requestedFolderPath = path.resolve(userStoragePath, folderPath || '');
+  
+      // Check if the requested folder path is outside the user's storage directory
+      if (!requestedFolderPath.startsWith(userStoragePath)) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid folderPath' });
+      }
+  
+      // Check if the requested folder exists
+      if (!fs.existsSync(requestedFolderPath)) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'Folder not found' });
+      }
+  
+      if (showStructure) {
+        // Return the entire directory structure
+        const directoryStructure = buildFileTree(userStoragePath, requestedFolderPath);
+        res.status(httpStatus.OK).json({ structure: directoryStructure });
+      } else {
+        // Return only the content of the specified path
+        const content = listFolderContent(requestedFolderPath);
+        res.status(httpStatus.OK).json({ content });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to list files' });
     }
-
-    // Construct the full path to the requested folder
-    const requestedFolderPath = path.resolve(userStoragePath, folderPath || '');
-
-    // Check if the requested folder path is outside the user's storage directory
-    if (!requestedFolderPath.startsWith(userStoragePath)) {
-      return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid folderPath' });
-    }
-
-    // Check if the requested folder exists
-    if (!fs.existsSync(requestedFolderPath)) {
-      return res.status(httpStatus.NOT_FOUND).json({ message: 'Folder not found' });
-    }
-
-    if (showStructure) {
-      // Return the entire directory structure
-      const directoryStructure = buildFileTree(userStoragePath, requestedFolderPath);
-      res.status(httpStatus.OK).json({ structure: directoryStructure });
-    } else {
-      // Return only the content of the specified path
-      const content = listFolderContent(requestedFolderPath);
-      res.status(httpStatus.OK).json({ content });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to list files' });
-  }
-};
+  };
+  
 
 function buildFileTree(basePath, directory) {
   const stats = fs.statSync(directory);
