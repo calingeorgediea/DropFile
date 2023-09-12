@@ -202,8 +202,8 @@ const createDirectory = async (req, res) => {
       const userID = req.user.id;
   
       // Get the folder path from the query parameters
-      const { folderPath, showStructure } = req.query;
-  
+      const { folderPath } = req.query;
+      const { showStructure } = req.body;
       // Construct the full path to the user's storage directory
       const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
   
