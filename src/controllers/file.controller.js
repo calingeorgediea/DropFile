@@ -199,6 +199,39 @@ const createDirectory = async (req, res) => {
     }
   };
 
+  const download = async (req,res) => {
+
+    try {
+      const userID = req.user.id;
+
+      const {targetFile} = req.query;
+
+      const userStoragePath = path.resolve(`./DropFile/users/${userID}`);
+
+      // Determine the base path for deletion (root or folderPath)
+      const basePath = userStoragePath;
+  
+      // Determine whether to delete a file or a directory based on the provided parameters
+
+      const itemPath = path.resolve(basePath, targetFile);
+      console.log(basePath);
+      console.log(targetFile);
+      if (fs.existsSync(basePath)) {
+
+        res.download(basePath, targetFile, (err) => {
+
+            if (err) {
+                console.error(err);
+                res.status(500).json({ message: 'File download failed' });
+            }
+        });
+    } else {
+          res.status(404).json({ message: 'File not found' });
+      }
+    
+    } catch {}
+  }
+  
   const list = async (req, res) => {
     try {
       // Assuming user ID is available in req.user.id
@@ -250,5 +283,5 @@ module.exports = {
     list,
     createDirectory,
     deleteItem,rename,
-    moveFile
+    moveFile, download
 };
